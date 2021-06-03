@@ -62,6 +62,9 @@ int size_for_bin(int textlen) {
 
 void from_a85(const char* text, int textlen, u8* data) {
     while (textlen) {
+
+        while (*text == 0 || (*text >= 10 && *text <= 13)) { text++; textlen--; }
+
         if (textlen < 5) {
             // Determine represented value in base 85
             u32 val = 0;
@@ -82,12 +85,14 @@ void from_a85(const char* text, int textlen, u8* data) {
             }
             break;
         }
+
         // Determine represented value in base 85
         u32 val = (*(text++) - 33) * 52200625; // 85^4
         val += (*(text++) - 33) * 614125; // 85^3
         val += (*(text++) - 33) * 7225; // 85^2
         val += (*(text++) - 33) * 85; // 85^1
         val += (*(text++) - 33); // 85^0
+
         // Write out in big-endian order
         *(data++) = val >> 24;
         *(data++) = val >> 16;
