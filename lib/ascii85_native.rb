@@ -7,21 +7,20 @@ module Ascii85Native
 
   ffi_lib File.join(File.dirname(__FILE__), 'ascii85_native.so')
 
-  #void to_a85(const u8* data, int binlen, char* text, bool append_null);
-  attach_function :to_a85, [:buffer_in, :int, :buffer_out, :bool], :void
+  #void a85_encode(const u8* data, int binlen, char* text, bool append_null);
+  attach_function :a85_encode, [:buffer_in, :int, :buffer_out, :bool], :void
 
-  #int size_for_a85(int binlen, bool append_null);
-  attach_function :size_for_a85, [:int, :bool], :int
+  #int a85_encoded_size(int binlen, bool append_null);
+  attach_function :a85_encoded_size, [:int, :bool], :int
 
-  #void from_a85(const char* text, int textlen, u8* data);
-  attach_function :from_a85, [:buffer_in, :int, :buffer_out], :void
+  #void a85_decode(const char* text, int textlen, u8* data);
+  attach_function :a85_decode, [:buffer_in, :int, :buffer_out], :void
 
-  #int size_for_bin(int textlen)
-  attach_function :size_for_bin, [:int], :int
-
+  #int a85_decoded_size(int textlen)
+  attach_function :a85_decoded_size, [:int], :int
 
   def self.encode(input, include_delimiter=false)
-    if input.nil?
+    if input.nil? || input.size == 0 
       return '<~~>' if include_delimiter
       return ''
     end
@@ -35,10 +34,10 @@ module Ascii85Native
 
     FFI::MemoryPointer.new(:uint8, input_data.size) do |in_uint8|
       in_uint8.write_array_of_type(FFI::TYPE_UINT8, :put_uint8, input_data)
-      out_size = self.size_for_a85(input_data.size, true)
+      out_size = self.a85_encoded_size(input_data.size, true)
 
       FFI::MemoryPointer.new(:uint8, out_size) do |output|
-        self.to_a85(in_uint8, input_data.size, output, true)
+        self.a85_encode(in_uint8, input_data.size, output, true)
         if include_delimiter
           return '<~' + (output.read_string() || '') + '~>'
         else
@@ -49,11 +48,15 @@ module Ascii85Native
   end
 
 
-  def self.decode(input)
-    return "" if input.nil?
+  def self.decode(input, force_delimiter=true)
+    return "" if input.nil? || input.size == 0
 
-    if input[0] == '<' && input[1] == '~' && input[-2] == '~' && input[-1] == '>'
+    if force_delimiter
       input = input[2..-3]
+    else
+      start_slice = find_start_slice(input)
+      end_slice = find_end_slice(input)
+      input = input[start_slice..end_slice] if start_slice != 0 || end_slice != -1
     end
 
     FFI::MemoryPointer.new(:char, input.size) do |in_char|
@@ -61,9 +64,47 @@ module Ascii85Native
       out_size = self.size_for_bin(input.size)
 
       FFI::MemoryPointer.new(:uint8, out_size) do |output|
-        self.from_a85(in_char, input.size, output)
+        self.a85_decode(in_char, input.size, output)
         return output.read_string()
       end
     end
+  end
+
+  def self.find_start_slice(input)
+    start_slice = 0
+    cursor = 0 
+
+    input.size.times do |i|
+      if ['\n', '\r', ' '].include?(input[cursor])
+        cursor += 1
+        next
+      elsif input[cursor] == '<' && input[cursor+1] == '~'
+        start_slice = cursor + 2
+        break
+      else
+        break # input is not delimited
+      end
+    end
+
+    return start_slice
+  end
+
+  def self.find_end_slice(input)
+    end_slice = -1
+    cursor = -1
+
+    input.size.times do |i|
+      if ['\n', '\r', ' '].include?(input[cursor])
+        cursor -= 1
+        next
+      elsif input[cursor] == '>' && input[cursor-1] == '~'
+        end_slice = cursor - 2
+        break
+      else
+        break # input is not delimited
+      end
+    end
+
+    return end_slice
   end
 end
