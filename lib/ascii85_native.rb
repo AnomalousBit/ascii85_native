@@ -5,6 +5,7 @@ require 'ffi'
 module Ascii85Native
   extend FFI::Library
 
+  ffi_lib 'c'
   ffi_lib File.join(File.dirname(__FILE__), 'ascii85_native.so')
 
   #void a85_encode(const u8* data, int binlen, char* text, bool append_null);
@@ -13,11 +14,16 @@ module Ascii85Native
   #int a85_encoded_size(int binlen, bool append_null);
   attach_function :a85_encoded_size, [:int, :bool], :int
 
+  #int a85_decoded_size(int textlen)
+  attach_function :a85_decoded_size, [:int], :int
+
+  #void a85_decode(const char* text, int textlen, u8* data);
+  attach_function :a85_filter_before_decode, [:buffer_in, :int, :buffer_out], :void
+
   #void a85_decode(const char* text, int textlen, u8* data);
   attach_function :a85_decode, [:buffer_in, :int, :buffer_out], :void
 
-  #int a85_decoded_size(int textlen)
-  attach_function :a85_decoded_size, [:int], :int
+  attach_function :strlen, [:string], :int
 
   def self.encode(input, include_delimiter=false)
     if input.nil? || input.size == 0 
@@ -60,12 +66,19 @@ module Ascii85Native
     end
 
     FFI::MemoryPointer.new(:char, input.size) do |in_char|
-      in_char.write_string(input)
-      out_size = self.size_for_bin(input.size)
+      FFI::MemoryPointer.new(:char, input.size) do |filtered_char|
+        in_char.write_string(input)
 
-      FFI::MemoryPointer.new(:uint8, out_size) do |output|
-        self.a85_decode(in_char, input.size, output)
-        return output.read_string()
+        self.a85_filter_before_decode(in_char, input.size, filtered_char)
+        filtered_length = self.strlen(filtered_char.read_string())
+        puts "filtered_length: #{filtered_length}"
+
+        out_size = self.a85_decoded_size(filtered_length)
+
+        FFI::MemoryPointer.new(:uint8, out_size) do |output|
+          self.a85_decode(filtered_char, filtered_length, output)
+          return output.read_string()
+        end
       end
     end
   end

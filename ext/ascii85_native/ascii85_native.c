@@ -53,7 +53,7 @@ void a85_encode(const u8* input, int input_length, char* output, bool append_nul
 }
 
 int a85_decoded_size(int input_length) {
-    return ((input_length * 4) / 5) + 1;
+    return ((input_length * 4) / 5);
 }
 
 void a85_filter_before_decode(const char* input, int input_length, char* output) {
@@ -66,30 +66,29 @@ void a85_filter_before_decode(const char* input, int input_length, char* output)
 		input++;
 		input_remaining--;
 	}
-	*output = '\0';
+	//*output = '\0';
 }
 
 void a85_decode(const char* input, int input_length, u8* output) {
-	char* filtered_input;
-	filtered_input = (char*)malloc(input_length*sizeof(char));
+	// this is now done from the ruby side
+	//char* filtered_input;
+	//filtered_input = (char*)malloc(input_length*sizeof(char));
+	//a85_filter_before_decode(input, input_length, filtered_input);
+	//int filtered_length = strlen(filtered_input);
 
-	a85_filter_before_decode(input, input_length, filtered_input);
+    while (input_length) {
 
-	int filtered_length = strlen(filtered_input);
+		if (*input == 0) { break; }
 
-    while (filtered_length) {
+        if (*input >= 10 && *input <= 13) { input++; input_length--; continue; }
 
-		if (*filtered_input == 0) { break; }
-
-        if (*filtered_input >= 10 && *filtered_input <= 13) { filtered_input++; filtered_length--; continue; }
-
-        if (filtered_length < 5) {
+        if (input_length < 5) {
             // Determine represented value in base 85
             u32 val = 0;
             int factor = 52200625; // 85^4
             int i;
-            for (i = 0; i < filtered_length; i++) {
-                val += (*(filtered_input++) - 33) * factor;
+            for (i = 0; i < input_length; i++) {
+                val += (*(input++) - 33) * factor;
                 factor /= 85;
             }
             for (; i < 5; i++) {
@@ -97,7 +96,7 @@ void a85_decode(const char* input, int input_length, u8* output) {
                 factor /= 85;
             }
             int shift = 24;
-            for (i = 0; i < filtered_length - 1; i++) {
+            for (i = 0; i < input_length - 1; i++) {
                 *(output++) = val >> shift;
                 shift -= 8;
             }
@@ -105,19 +104,17 @@ void a85_decode(const char* input, int input_length, u8* output) {
         }
 
         // Determine represented value in base 85
-        u32 val = (*(filtered_input++) - 33) * 52200625; // 85^4
-        val += (*(filtered_input++) - 33) * 614125; // 85^3
-        val += (*(filtered_input++) - 33) * 7225; // 85^2
-        val += (*(filtered_input++) - 33) * 85; // 85^1
-        val += (*(filtered_input++) - 33); // 85^0
+        u32 val = (*(input++) - 33) * 52200625; // 85^4
+        val += (*(input++) - 33) * 614125; // 85^3
+        val += (*(input++) - 33) * 7225; // 85^2
+        val += (*(input++) - 33) * 85; // 85^1
+        val += (*(input++) - 33); // 85^0
 
         // Write out in big-endian order
         *(output++) = val >> 24;
         *(output++) = val >> 16;
         *(output++) = val >> 8;
         *(output++) = val;
-        filtered_length -= 5;
+        input_length -= 5;
     }
-
-	*(output++) = '\0';
 }
