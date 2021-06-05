@@ -3,6 +3,7 @@
 #include "stdlib.h"
 #include "ascii85_native.h"
 #include "stdio.h"
+#include "string.h"
 
 int a85_encoded_size(int input_length, bool append_null) {
     return (input_length * 5 + 3) / 4 + !!append_null;

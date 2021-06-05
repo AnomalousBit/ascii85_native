@@ -18,12 +18,9 @@ module Ascii85Native
   attach_function :a85_decoded_size, [:int], :int
 
   #void a85_decode(const char* text, int textlen, u8* data);
-  attach_function :a85_filter_before_decode, [:buffer_in, :int, :buffer_out], :void
-
-  #void a85_decode(const char* text, int textlen, u8* data);
   attach_function :a85_decode, [:buffer_in, :int, :buffer_out], :void
 
-  attach_function :strlen, [:string], :int
+  attach_function :strlen, [:buffer_in], :int
 
   def self.encode(input, include_delimiter=false)
     if input.nil? || input.size == 0 
@@ -54,36 +51,31 @@ module Ascii85Native
   end
 
 
-  def self.decode(input, force_delimiter=true)
+  def self.decode(input, force_delimiter=false)
     return "" if input.nil? || input.size == 0
 
+    # Array slicing in ruby 3.0.1 appears to be constant time O(1): no performance hit based on array size.
+    # No reason to implement this code segment in C if this holds true.
     if force_delimiter
       input = input[2..-3]
     else
-      start_slice = find_start_slice(input)
-      end_slice = find_end_slice(input)
-      input = input[start_slice..end_slice] if start_slice != 0 || end_slice != -1
+      stream_start = find_stream_start(input)
+      stream_end = find_stream_end(input)
+      input = input[stream_start..stream_end] if stream_start != 0 || stream_end != -1
     end
 
     FFI::MemoryPointer.new(:char, input.size) do |in_char|
-      FFI::MemoryPointer.new(:char, input.size) do |filtered_char|
-        in_char.write_string(input)
+      in_char.write_string(input)
+      out_size = self.a85_decoded_size(input.size)
 
-        self.a85_filter_before_decode(in_char, input.size, filtered_char)
-        filtered_length = self.strlen(filtered_char.read_string())
-        puts "filtered_length: #{filtered_length}"
-
-        out_size = self.a85_decoded_size(filtered_length)
-
-        FFI::MemoryPointer.new(:uint8, out_size) do |output|
-          self.a85_decode(filtered_char, filtered_length, output)
-          return output.read_string()
-        end
+      FFI::MemoryPointer.new(:uint8, out_size) do |output|
+        self.a85_decode(in_char, strlen(in_char), output)
+        return output.read_string()
       end
     end
   end
 
-  def self.find_start_slice(input)
+  def self.find_stream_start(input)
     start_slice = 0
     cursor = 0 
 
@@ -102,7 +94,7 @@ module Ascii85Native
     return start_slice
   end
 
-  def self.find_end_slice(input)
+  def self.find_stream_end(input)
     end_slice = -1
     cursor = -1
 

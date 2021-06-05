@@ -5,5 +5,7 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 ascii85_native-*.gem
+ext/ascii85_native/test_encode
+ext/ascii85_native/test_decode
 lib/ascii85_native.so
 tmp/
