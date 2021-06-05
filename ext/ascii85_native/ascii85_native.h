@@ -22,7 +22,3 @@ int a85_decoded_size(int input_length);
 // Translates the given Ascii85 input to binary output.
 // Can translate in-place.
 void a85_decode(const char* input, int input_length, u8* output);
-
-// Removes unused / ignored characters from the ascii85 input
-// TODO: identify and remove <~ and ~> delimiters
-void a85_filter_before_decode(const char* input, int input_length, char* output);
