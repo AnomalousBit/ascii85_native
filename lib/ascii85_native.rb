@@ -80,7 +80,7 @@ module Ascii85Native
     cursor = 0 
 
     input.size.times do |i|
-      if ['\n', '\r', ' '].include?(input[cursor])
+      if ["\n", "\r", ' '].include?(input[cursor])
         cursor += 1
         next
       elsif input[cursor] == '<' && input[cursor+1] == '~'
@@ -99,7 +99,7 @@ module Ascii85Native
     cursor = -1
 
     input.size.times do |i|
-      if ['\n', '\r', ' '].include?(input[cursor])
+      if ["\n", "\r", ' '].include?(input[cursor])
         cursor -= 1
         next
       elsif input[cursor] == '>' && input[cursor-1] == '~'
