@@ -66,7 +66,7 @@ int a85_decoded_size(int input_length) {
 void a85_decode(const char* input, int input_length, u8* output) {
     while (input_length) {
 
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
 
         if (input_length < 5) {
             // Determine represented value in base 85
@@ -91,15 +91,15 @@ void a85_decode(const char* input, int input_length, u8* output) {
         }
 
         // Determine represented value in base 85 while throwing out invalid ascii85 characters
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
         u32 val = (*(input++) - 33) * 52200625; // 85^4
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
         val += (*(input++) - 33) * 614125; // 85^3
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
         val += (*(input++) - 33) * 7225; // 85^2
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
         val += (*(input++) - 33) * 85; // 85^1
-        while ((*input >= 9 && *input <= 13) || *input == 32) { input++; input_length--;}
+        while ((*input >= 9 && *input <= 13) || *input == 32 || *input == 0) { input++; input_length--;}
         val += (*(input++) - 33); // 85^0
 
         // Write out in big-endian order

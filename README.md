@@ -36,9 +36,19 @@ Ascii85Native::encode(str, true)
 ```
 
 ## Testing
-To run the test suite (currently based on the coverage provided by ascii85 gem), run `ruby spec/lib/ascii85_native_spec.rb`.
+You will need to install the `rake-compiler` gem (`gem install rake-compiler`) for manual extension compilation.
 
-There are several tests failing still, will review when I have time or please feel free to open a pull request.
+Run `rake compile` to generate the required ascii85_native.so shared library before running tests.
+
+To run the minitest suite (currently based on the coverage provided by ascii85 gem), run `cd spec/lib ; ruby ascii85_native_spec.rb`.
+
+There are a few tests currently failing. Most failed tests are around Ascii85 delimiters with extraneous content to be ignored after the delimiters.
+
+I recommend only sending the actual Ascii85 encoded stream to this library, not whole files with the expectation that the library will find and decode only the Ascii85 portion of the file (it won't).
+
+I can review a failing test if there is a demand, please feel free to open an issue or pull request.
+
+There are also C programs that can be used for inspection of the C code in `ext/ascii85_native_testing/`
 
 ## Manually Build the Gem
 Use `gem build` to manually create the gem, then `gem install ascii85_native-x.y.z.gem` to install the generated gem.

@@ -1,6 +1,6 @@
 Gem::Specification.new "ascii85_native", "1.0" do |s|
   s.name        = 'ascii85_native'
-  s.version     = '1.0.2'
+  s.version     = '1.0.3'
   s.summary     = "Ascii85 Encoder / Decoder with Native C Extensions"
   s.description = "A faster implementation of the Ascii85 Encode & Decode methods using native C extensions to do the heavy lifting."
   s.authors     = ["Jason Crossfield"]

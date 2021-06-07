@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "ascii85_native.c"
+#include "../ascii85_native/ascii85_native.c"
 
 int main() {
 

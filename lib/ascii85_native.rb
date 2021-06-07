@@ -5,7 +5,6 @@ require 'ffi'
 module Ascii85Native
   extend FFI::Library
 
-  ffi_lib 'c'
   ffi_lib File.join(File.dirname(__FILE__), 'ascii85_native.so')
 
   #void a85_encode(const u8* data, int binlen, char* text, bool append_null);
@@ -19,8 +18,6 @@ module Ascii85Native
 
   #void a85_decode(const char* text, int textlen, u8* data);
   attach_function :a85_decode, [:buffer_in, :int, :buffer_out], :void
-
-  attach_function :strlen, [:buffer_in], :int
 
   def self.encode(input, include_delimiter=false)
     if input.nil? || input.size == 0 
@@ -69,7 +66,7 @@ module Ascii85Native
       out_size = self.a85_decoded_size(input.size)
 
       FFI::MemoryPointer.new(:uint8, out_size) do |output|
-        self.a85_decode(in_char, strlen(in_char), output)
+        self.a85_decode(in_char, input.size, output)
         return output.read_string()
       end
     end
