@@ -20,7 +20,7 @@ l(DId<j@<?3r@:F%a+D58'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G
 >uD.RTpAKYo'+CT/5+Cei#DII?(E,9)oF*2M7/c~>
 ENCODED
 
-Ascii85Native::decode(str)
+Ascii85Native::decode(encoded_str)
 ```
 
 ### Encoding
