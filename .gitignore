@@ -9,3 +9,4 @@ ext/ascii85_native/test_encode
 ext/ascii85_native/test_decode
 lib/ascii85_native.so
 tmp/
+/test.rb

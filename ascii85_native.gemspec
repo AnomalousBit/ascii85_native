@@ -10,6 +10,8 @@ Gem::Specification.new "ascii85_native", "1.0" do |s|
   s.license     = 'MIT'
   s.require_paths = ['lib', 'ext/ascii85_native']
   s.extensions  = %w[ext/ascii85_native/extconf.rb]
+  s.required_ruby_version = '>= 2.3'
   s.add_runtime_dependency 'ffi', '~> 1.15', '>= 1.15.0'
   s.add_development_dependency 'rake', '~> 13.0', '>= 13.0.1'
+  s.add_development_dependency 'rake-compiler', '~> 1.0'
 end
