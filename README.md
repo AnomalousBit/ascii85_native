@@ -56,7 +56,7 @@ Use `gem build` to manually create the gem, then `gem install ascii85_native-x.y
 ## Why ascii85_native?
 This gem is being used for performance improvements in my fork of the [pdf-reader gem](https://github.com/AnomalousBit/pdf-reader)
 
-After generating a flamegraph for a performance analysis of parsing several hundred PDF files, this gem reduced execution time by over 60% when compared to the ascii85 gem used by [pdf-reader gem](https://github.com/yob/pdf-reader).
+After generating a flamegraph for a performance analysis of parsing several hundred PDF files, this gem improved execution times by nearly 60x when compared to the ascii85 gem used by [pdf-reader gem](https://github.com/yob/pdf-reader). YMMV.
 
 ## License
 MIT Licensed, please review the LICENSE file for details and rights.
