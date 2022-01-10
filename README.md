@@ -54,9 +54,7 @@ There are also C programs that can be used for inspection of the C code in `ext/
 Use `gem build` to manually create the gem, then `gem install ascii85_native-x.y.z.gem` to install the generated gem.
 
 ## Why ascii85_native?
-This gem is being used for performance improvements in my fork of the [pdf-reader gem](https://github.com/AnomalousBit/pdf-reader)
-
-After generating a flamegraph for a performance analysis of parsing several hundred PDF files, this gem improved execution times by nearly 60x when compared to the ascii85 gem used by [pdf-reader gem](https://github.com/yob/pdf-reader). YMMV.
+After generating a flamegraph for a performance analysis of parsing several hundred PDF files, this gem improved execution times by nearly 60x when compared to the ascii85 gem included by default by [pdf-reader gem](https://github.com/yob/pdf-reader). The pdf-reader gem now automatically detects the presence of the ascii85_native gem and will use it in place of the default.
 
 ## License
 MIT Licensed, please review the LICENSE file for details and rights.
